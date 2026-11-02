@@ -1,34 +1,35 @@
-from fastapi import FastAPI
-#from search_skins import fetch_items
-import json
-from pathlib import Path
-CACHE_FILE = Path("items.json")
-app = FastAPI()
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from database import engine, get_db, Base
+import models
 
-@app.get("/skins")
-def show_skins():
-    if CACHE_FILE.exists():
-        data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
-        print("wczytano z pliku")
-    else:
-        data = fetch_items()
-        CACHE_FILE.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-        print("zapisano do pliku")
+# Tworzy tabele w bazie (jeśli nie istnieją)
+Base.metadata.create_all(bind=engine)
 
-    # return data[:20]
-    names = [items["market_hash_name"] for items in data]
-    return names[:50]
+app = FastAPI(title="CS2 Market API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+@app.get("/")
+def root():
+    return {"message": "CS2 Market API działa z bazą danych!"}
 
+@app.get("/items")
+def get_items(db: Session = Depends(get_db)):
+    items = db.query(models.Item).all()
+    return items
 
-
-
-
-
-
-
-
-
-# http://localhost:8000
-# http://localhost:8000/docs
+@app.post("/items")
+def create_item(name: str, price: float, rarity: str = None, db: Session = Depends(get_db)):
+    new_item = models.Item(name=name, price=price, rarity=rarity)
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+    return new_item
