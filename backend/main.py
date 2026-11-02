@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from search_skins import fetch_items
+#from search_skins import fetch_items
 import json
 from pathlib import Path
 CACHE_FILE = Path("items.json")
