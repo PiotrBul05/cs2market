@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from database import engine, get_db, Base
 import models
 
-# Tworzy tabele w bazie (jeśli nie istnieją)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="CS2 Market API")
@@ -27,8 +26,35 @@ def get_items(db: Session = Depends(get_db)):
     return items
 
 @app.post("/items")
-def create_item(name: str, price: float, rarity: str = None, db: Session = Depends(get_db)):
-    new_item = models.Item(name=name, price=price, rarity=rarity)
+def create_item(
+    name: str,
+    price: float,
+    rarity: str = None,
+    market_hash_name: str = None,
+    weapon: str = None,
+    min_price: float = None,
+    max_price: float = None,
+    suggested_price: float = None,
+    quantity: int = 0,
+    currency: str = "USD",
+    image_url: str = None,
+    item_page: str = None,
+    db: Session = Depends(get_db)
+):
+    new_item = models.Item(
+        name=name,
+        price=price,
+        rarity=rarity,
+        market_hash_name=market_hash_name or name,
+        weapon=weapon,
+        min_price=min_price,
+        max_price=max_price,
+        suggested_price=suggested_price,
+        quantity=quantity,
+        currency=currency,
+        image_url=image_url,
+        item_page=item_page
+    )
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
