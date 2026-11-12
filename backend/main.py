@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from database import engine, get_db, Base
 import models
+from pydantic import BaseModel
+from typing import List
 
 Base.metadata.create_all(bind=engine)
 
@@ -68,3 +70,19 @@ def create_item(
     db.commit()
     db.refresh(new_item)
     return new_item
+
+    class SkinIn(BaseModel):
+    name: str
+    price: float
+
+@app.post("/test-receive")
+def test_receive(skins: List[SkinIn]):
+    # tu odbierasz listę obiektów
+    names = [skin.name for skin in skins]
+    total = sum(skin.price for skin in skins)
+    
+    return {
+        "ile_skinow": len(skins),
+        "nazwy": names,
+        "suma_cen": total
+    }
