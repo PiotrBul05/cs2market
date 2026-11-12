@@ -25,6 +25,15 @@ def get_items(db: Session = Depends(get_db)):
     items = db.query(models.Item).all()
     return items
 
+@app.get("/test-list")
+def test_list():
+    skiny = [
+        {"name": "AK-47 | Redline", "price": 25.5},
+        {"name": "AWP | Asiimov", "price": 89.0},
+        {"name": "M4A4 | Howl", "price": 1850.0}
+    ]
+    return skiny
+
 @app.post("/items")
 def create_item(
     name: str,
