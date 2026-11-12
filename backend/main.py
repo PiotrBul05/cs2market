@@ -71,13 +71,12 @@ def create_item(
     db.refresh(new_item)
     return new_item
 
-    class SkinIn(BaseModel):
+class SkinIn(BaseModel):
     name: str
     price: float
 
 @app.post("/test-receive")
 def test_receive(skins: List[SkinIn]):
-    # tu odbierasz listę obiektów
     names = [skin.name for skin in skins]
     total = sum(skin.price for skin in skins)
     
